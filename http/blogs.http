@@ -1,0 +1,2 @@
+curl -X GET "http://localhost:8080/blogs/1?language=uz&category=project&featured=true" \
+     -H "Accept: application/json"

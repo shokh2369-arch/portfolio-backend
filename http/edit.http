@@ -1,0 +1,7 @@
+PUT http://localhost:8080/update/30
+content-type: application/json"
+Authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNob2toMUBleGFtcGxlLmNvbSIsImV4cCI6MTc2MDM2OTUzMSwidXNlcm5hbWUiOiJzaG9raDEifQ.JbQwN_42TIfquVw2XCoQi-c5AwQpwgbVthEs7lqFoP0
+  {
+    "title": "Updated blog titlesfsdfsfasffs",
+    "body": "This is the updated content body."
+  }

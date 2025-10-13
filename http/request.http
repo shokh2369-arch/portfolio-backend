@@ -1,0 +1,9 @@
+curl -X POST http://localhost:8080/request \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John",
+    "lastname": "Doe",
+    "phone": "+1234567890",
+    "description": "Interested in your portfolio",
+    "telegram": "@john_doe"
+  }'

@@ -1,0 +1,12 @@
+POST http://localhost:8080/post
+Content-Type: application/json
+Authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNob2toMUBleGFtcGxlLmNvbSIsImV4cCI6MTc2MDAwNjM2NCwidXNlcm5hbWUiOiJzaG9raDEifQ.ENPo8aSG08RYm2N9JueQT4SqD5wy_0wJ-JhUVVFXik4
+
+{
+       "language": "uz",
+       "type": "project",
+       "image": "images.webp",
+       "title": "Learning Golang",
+       "body": "Golang is a statically typed programming language developed by Google...",
+       "meta_tag": "golang,programming,backend"
+}

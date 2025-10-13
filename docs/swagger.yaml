@@ -1,0 +1,424 @@
+basePath: /
+definitions:
+  admin.Address:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  admin.Login:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  content.Content:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        description: maps to rowid
+        type: integer
+      image:
+        type: string
+      language:
+        type: string
+      meta_tag:
+        type: string
+      score:
+        type: number
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  info.About:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      lastname:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      telegram:
+        type: string
+    required:
+    - lastname
+    - name
+    - phone
+    - telegram
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the portfolio back-end
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Portfolio
+  version: "1.0"
+paths:
+  /blog/{id}:
+    get:
+      description: Returns one content item (blog or project) by its ID
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/content.Content'
+        "400":
+          description: Invalid blog ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Blog not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get single content by ID
+      tags:
+      - content
+  /blogs/{page}:
+    get:
+      description: Returns paginated blogs with optional filters for language, category,
+        and title.
+      parameters:
+      - description: Page number
+        in: path
+        name: page
+        required: true
+        type: integer
+      - description: 'Language filter (default: en)'
+        enum:
+        - en
+        - ru
+        - uz
+        in: query
+        name: language
+        type: string
+      - description: Category filter
+        enum:
+        - blog
+        - project
+        in: query
+        name: category
+        type: string
+      - description: Search by blog title
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blogs retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: No blogs found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get blogs
+      tags:
+      - Content
+  /delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: deletes blog
+      parameters:
+      - description: ID number to fetch
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Could not find blog with this ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to delete blog
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - TokenAuth: []
+      summary: for deleting the blog
+      tags:
+      - content
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Admin's login page
+      parameters:
+      - description: Admin login
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/admin.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged in successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not generate token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: login
+      tags:
+      - admin
+  /portfolio:
+    get:
+      description: Returns Hello World message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Hello endpoint
+      tags:
+      - general
+  /post:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new content entry (blog or project) in the database
+      parameters:
+      - description: Blog data
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/content.Content'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Blog created successfully
+          schema:
+            $ref: '#/definitions/content.Content'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Database or server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - TokenAuth: []
+      summary: Publish new blog
+      tags:
+      - content
+  /request:
+    post:
+      consumes:
+      - application/json
+      description: Accepts user portfolio request data, saves it, and notifies admin
+        via Telegram
+      parameters:
+      - description: Portfolio request data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/info.About'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Request successfully submitted
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "429":
+          description: Daily request limit reached
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Server or database error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Submit a portfolio request
+      tags:
+      - requests
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Register sign up in order to login
+      parameters:
+      - description: Admin sign up
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/admin.Address'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Signed up successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: The sign up must contain username, email, password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not sign up. Try again later
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Sign up admin
+      tags:
+      - admin
+  /update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: deletes blog
+      parameters:
+      - description: ID number to fetch
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Blog data
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/content.Content'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Could not find blog with this ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - TokenAuth: []
+      summary: for deleting the blog contents
+      tags:
+      - content
+securityDefinitions:
+  TokenAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
