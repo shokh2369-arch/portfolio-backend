@@ -536,6 +536,11 @@ const docTemplate = `{
     "definitions": {
         "admin.Address": {
             "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -572,8 +577,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "featured": {
+                    "type": "string"
+                },
                 "id": {
-                    "description": "maps to rowid",
                     "type": "integer"
                 },
                 "image": {
@@ -648,7 +655,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "portfolio-backend-1lh7.onrender.com",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Portfolio",
