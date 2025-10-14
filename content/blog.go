@@ -125,7 +125,6 @@ func GetById(id int64) (Content, error) {
 	return c, nil
 }
 
-// ✅ Get blogs (with or without search)
 func GetContents(title string, page int, language string, category string, featured string) ([]Content, error) {
 	const limit = 10
 	offset := (page - 1) * limit
@@ -137,21 +136,25 @@ func GetContents(title string, page int, language string, category string, featu
 
 	// 🔍 If search keyword is given
 	if title != "" {
-		match := fmt.Sprintf("%s*", title) // FTS5 wildcard
+		// FTS5 wildcard
+		match := title + "*"
+
 		query := `
 			SELECT d.id, d.language, d.type, d.image, d.title, d.body,
-				   d.created_at, d.featured, bm25(s) AS score
-			FROM blog_search s
-			JOIN blog_data d ON d.id = s.rowid
-			WHERE s MATCH ?
+				   d.created_at, d.featured, bm25(blog_search) AS score
+			FROM blog_search
+			JOIN blog_data d ON d.id = blog_search.rowid
+			WHERE blog_search MATCH ?
 			  AND (? = '' OR d.language = ?)
 			  AND (? = '' OR d.type = ?)
 			  AND (? = '' OR d.featured = ?)
 			ORDER BY score ASC
 			LIMIT ? OFFSET ?;
 		`
+
 		rows, err = db.DB.QueryContext(context.Background(),
-			query, match,
+			query,
+			match,
 			language, language,
 			category, category,
 			featured, featured,
@@ -167,6 +170,7 @@ func GetContents(title string, page int, language string, category string, featu
 			ORDER BY created_at DESC
 			LIMIT ? OFFSET ?;
 		`
+
 		rows, err = db.DB.QueryContext(context.Background(),
 			query,
 			language, language,
@@ -184,15 +188,17 @@ func GetContents(title string, page int, language string, category string, featu
 	for rows.Next() {
 		var c Content
 		if title != "" {
+			// search mode includes score
 			err = rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title,
 				&c.Body, &c.CreatedAt, &c.Featured, &c.Score)
 		} else {
+			// normal mode
 			err = rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title,
 				&c.Body, &c.CreatedAt, &c.Featured)
 			c.Score = nil
 		}
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 		c.Image = utils.Url(c.Image)
 		contents = append(contents, c)
