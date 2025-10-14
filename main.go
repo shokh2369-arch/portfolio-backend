@@ -41,27 +41,21 @@ func init() {
 	}
 }
 
-//@title Portfolio
+// @title Portfolio API
 // @version 1.0
-//@description This is the portfolio back-end
-// @termsOfService  http://swagger.io/terms/
+// @description This is the portfolio back-end
+// @termsOfService http://swagger.io/terms/
 
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
 
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8080
-// @BasePath  /
-
-// @securityDefinitions.apikey TokenAuth
-// @in header
-// @name Authorization
-
-// @externalDocs.description  OpenAPI
-// @externalDocs.url          https://swagger.io/resources/open-api/
+// @host portfolio-backend-1lh7.onrender.com
+// @BasePath /
+// @schemes https
 func main() {
 	db.Initdb()
 	r := gin.Default()

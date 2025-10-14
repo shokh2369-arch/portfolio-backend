@@ -1,8 +1,11 @@
 {
+    "schemes": [
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "This is the portfolio back-end",
-        "title": "Portfolio",
+        "title": "Portfolio API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
@@ -15,7 +18,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "portfolio-backend-1lh7.onrender.com",
     "basePath": "/",
     "paths": {
         "/blog/{id}": {
@@ -530,6 +533,11 @@
     "definitions": {
         "admin.Address": {
             "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -566,8 +574,10 @@
                 "created_at": {
                     "type": "string"
                 },
+                "featured": {
+                    "type": "string"
+                },
                 "id": {
-                    "description": "maps to rowid",
                     "type": "integer"
                 },
                 "image": {
@@ -625,16 +635,5 @@
                 }
             }
         }
-    },
-    "securityDefinitions": {
-        "TokenAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
-    },
-    "externalDocs": {
-        "description": "OpenAPI",
-        "url": "https://swagger.io/resources/open-api/"
     }
 }

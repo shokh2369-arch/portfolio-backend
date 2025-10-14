@@ -61,8 +61,6 @@ func (c *Content) Add() error {
 
 func (c *Content) Update() error {
 	imagePath := c.Image
-
-	// ✅ Only apply ImageUploadPath() if it's a local file, not a URL
 	if !strings.HasPrefix(imagePath, "http") {
 		imagePath = utils.ImageUploadPath(imagePath)
 	}
@@ -112,8 +110,8 @@ func GetContents(title string, page int, language string, category string, featu
 	var rows *sql.Rows
 	var err error
 
-	if title != "" {
-		// 🔍 Full-text search query
+	if strings.TrimSpace(title) != "" {
+		// 🔍 Improved FTS5 search (matches title or body)
 		query := `
 			SELECT d.id, d.language, d.type, d.image, d.title, d.body, d.created_at, d.featured, bm25(s) AS score
 			FROM blog_search s
@@ -125,10 +123,11 @@ func GetContents(title string, page int, language string, category string, featu
 			ORDER BY score ASC
 			LIMIT ? OFFSET ?;
 		`
-		match := fmt.Sprintf("title:%s*", title)
+
+		match := fmt.Sprintf("%s*", strings.TrimSpace(title))
 		rows, err = db.DB.Query(query, match, language, category, featured, limit, offset)
 	} else {
-		// 🧾 Normal non-search query (no score)
+		// 🧾 Normal query without search
 		query := `
 			SELECT id, language, type, image, title, body, created_at, featured
 			FROM blog_data
@@ -148,20 +147,15 @@ func GetContents(title string, page int, language string, category string, featu
 
 	for rows.Next() {
 		var c Content
-
-		if title != "" {
-			// With score (search mode)
+		if strings.TrimSpace(title) != "" {
 			if err := rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title, &c.Body, &c.CreatedAt, &c.Featured, &c.Score); err != nil {
 				return nil, err
 			}
 		} else {
-			// Without score
 			if err := rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title, &c.Body, &c.CreatedAt, &c.Featured); err != nil {
 				return nil, err
 			}
-			c.Score = nil
 		}
-
 		c.Image = utils.Url(c.Image)
 		contents = append(contents, c)
 	}
