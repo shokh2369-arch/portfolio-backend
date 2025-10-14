@@ -644,7 +644,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "portfolio-backend-1lh7.onrender.com",
+	Host:             "portfolio-backend-3o6v.onrender.com",
 	BasePath:         "/",
 	Schemes:          []string{"https"},
 	Title:            "Portfolio API",
