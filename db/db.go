@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -78,50 +79,18 @@ func content() {
 		content='blog_data',
 		content_rowid='id'
 	);
-
-	-- Trigger for INSERT
-	CREATE TRIGGER IF NOT EXISTS blog_data_ai AFTER INSERT ON blog_data BEGIN
-		INSERT INTO blog_search(rowid, title, body)
-		VALUES (new.id, new.title, new.body);
-	END;
-
-	-- Trigger for DELETE
-	CREATE TRIGGER IF NOT EXISTS blog_data_ad AFTER DELETE ON blog_data BEGIN
-		INSERT INTO blog_search(blog_search, rowid, title, body)
-		VALUES('delete', old.id, old.title, old.body);
-	END;
-
-	-- Trigger for UPDATE
-	CREATE TRIGGER IF NOT EXISTS blog_data_au AFTER UPDATE ON blog_data BEGIN
-		INSERT INTO blog_search(blog_search, rowid, title, body)
-		VALUES('delete', old.id, old.title, old.body);
-		INSERT INTO blog_search(rowid, title, body)
-		VALUES (new.id, new.title, new.body);
-	END;
 	`
 
 	_, err := DB.Exec(query)
 	if err != nil {
-		log.Fatalf("Error creating tables or triggers: %v", err)
+		fmt.Println("Error creating content tables:", err)
+	} else {
+		fmt.Println("✅ Content tables initialized successfully.")
 	}
 
-	// ✅ Backfill blog_search if it's empty
-	var count int
-	err = DB.QueryRow(`SELECT count(*) FROM blog_search;`).Scan(&count)
+	_, err = DB.ExecContext(context.Background(), query)
 	if err != nil {
-		log.Printf("Error checking blog_search count: %v", err)
-		return
-	}
-
-	if count == 0 {
-		log.Println("blog_search is empty — backfilling data...")
-		_, err = DB.Exec(`INSERT INTO blog_search(rowid, title, body)
-			SELECT id, title, body FROM blog_data;`)
-		if err != nil {
-			log.Printf("Error backfilling blog_search: %v", err)
-		} else {
-			log.Println("✅ blog_search successfully backfilled.")
-		}
+		log.Fatalf("❌ Could not create blog table: %v", err)
 	}
 }
 

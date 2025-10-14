@@ -53,7 +53,7 @@ func init() {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host portfolio-backend-1lh7.onrender.com
+// @host portfolio-backend-3o6v.onrender.com
 // @BasePath /
 // @schemes https
 func main() {
