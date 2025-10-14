@@ -69,7 +69,7 @@ func content() {
 		title TEXT,
 		body TEXT,
 		meta_tag TEXT,
-		created_at TEXT,
+		created_at TEXT DEFAULT (datetime('now')),
 		featured TEXT
 	);
 
@@ -77,21 +77,48 @@ func content() {
 		title,
 		body,
 		content='blog_data',
-		content_rowid='id'
+		content_rowid='id',
+		tokenize='porter'
 	);
+
+	-- Trigger: when a blog is added, insert into blog_search
+	CREATE TRIGGER IF NOT EXISTS blog_data_ai AFTER INSERT ON blog_data BEGIN
+		INSERT INTO blog_search(rowid, title, body)
+		VALUES (new.id, new.title, new.body);
+	END;
+
+	-- Trigger: when a blog is updated, update the FTS record
+	CREATE TRIGGER IF NOT EXISTS blog_data_au AFTER UPDATE ON blog_data BEGIN
+		UPDATE blog_search
+		SET title = new.title,
+			body = new.body
+		WHERE rowid = new.id;
+	END;
+
+	-- Trigger: when a blog is deleted, remove it from FTS
+	CREATE TRIGGER IF NOT EXISTS blog_data_ad AFTER DELETE ON blog_data BEGIN
+		DELETE FROM blog_search WHERE rowid = old.id;
+	END;
 	`
 
-	_, err := DB.Exec(query)
+	ctx := context.Background()
+	_, err := DB.ExecContext(ctx, query)
 	if err != nil {
-		fmt.Println("Error creating content tables:", err)
-	} else {
-		fmt.Println("✅ Content tables initialized successfully.")
+		log.Fatalf("❌ Could not create blog tables: %v", err)
 	}
 
-	_, err = DB.ExecContext(context.Background(), query)
+	// 🧠 Ensure blog_search is synced with any existing data
+	_, err = DB.ExecContext(ctx, `
+	INSERT INTO blog_search(rowid, title, body)
+	SELECT id, title, body
+	FROM blog_data
+	WHERE id NOT IN (SELECT rowid FROM blog_search);
+	`)
 	if err != nil {
-		log.Fatalf("❌ Could not create blog table: %v", err)
+		log.Printf("⚠️ Could not sync blog_search with blog_data: %v", err)
 	}
+
+	fmt.Println("✅ Content tables and FTS index initialized successfully.")
 }
 
 func signUp() {

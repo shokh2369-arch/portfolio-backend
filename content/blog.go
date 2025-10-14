@@ -23,7 +23,7 @@ type Content struct {
 	Score     *float64 `json:"score,omitempty"`
 }
 
-// Add new content and sync with FTS table
+// ✅ Add new content and sync with FTS
 func (c *Content) Add() error {
 	if c.Featured == "" {
 		c.Featured = "false"
@@ -47,31 +47,24 @@ func (c *Content) Add() error {
 		return fmt.Errorf("failed to insert content: %w", err)
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return fmt.Errorf("failed to get last insert id: %w", err)
-	}
+	id, _ := res.LastInsertId()
 	c.ID = id
 
-	// Get created_at
 	row := db.DB.QueryRowContext(context.Background(), "SELECT created_at FROM blog_data WHERE id = ?", id)
 	if err := row.Scan(&c.CreatedAt); err != nil {
-		return fmt.Errorf("could not find blog_data with this ID: %w", err)
+		return fmt.Errorf("could not get created_at: %w", err)
 	}
 
-	// Sync new record into FTS
-	_, err = db.DB.ExecContext(context.Background(),
-		`INSERT INTO blog_search(rowid, title, body) VALUES (?, ?, ?)`,
-		c.ID, c.Title, c.Body,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to update blog_search index: %w", err)
-	}
+	// FTS is auto-synced by triggers, but just in case:
+	_, _ = db.DB.ExecContext(context.Background(),
+		`INSERT INTO blog_search(rowid, title, body)
+		 SELECT id, title, body FROM blog_data
+		 WHERE id NOT IN (SELECT rowid FROM blog_search);`)
 
 	return nil
 }
 
-// Update existing content and refresh FTS index
+// ✅ Update existing content and FTS
 func (c *Content) Update() error {
 	imagePath := c.Image
 	if !strings.HasPrefix(imagePath, "http") {
@@ -84,72 +77,55 @@ func (c *Content) Update() error {
 	WHERE id = ?;
 	`
 	_, err := db.DB.ExecContext(context.Background(), query,
-		imagePath,
-		c.Title,
-		c.Body,
-		c.Tag,
-		c.Featured,
-		c.ID,
-	)
+		imagePath, c.Title, c.Body, c.Tag, c.Featured, c.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update blog_data: %w", err)
 	}
 
-	// Delete old FTS record
+	// Refresh FTS manually (triggers usually handle this)
 	_, _ = db.DB.ExecContext(context.Background(),
 		`INSERT INTO blog_search(blog_search, rowid, title, body)
 		 VALUES('delete', ?, '', '');`, c.ID)
-
-	// Reinsert updated FTS record
-	_, err = db.DB.ExecContext(context.Background(),
+	_, _ = db.DB.ExecContext(context.Background(),
 		`INSERT INTO blog_search(rowid, title, body) VALUES (?, ?, ?)`,
-		c.ID, c.Title, c.Body,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to reinsert FTS record: %w", err)
-	}
+		c.ID, c.Title, c.Body)
 
 	return nil
 }
 
-// Delete content and remove from FTS index
+// ✅ Delete from both tables
 func (c *Content) Delete() error {
-	_, err := db.DB.ExecContext(context.Background(), "DELETE FROM blog_data WHERE id = ?", c.ID)
+	_, err := db.DB.ExecContext(context.Background(),
+		"DELETE FROM blog_data WHERE id = ?", c.ID)
 	if err != nil {
 		return fmt.Errorf("failed to delete content: %w", err)
 	}
-
-	// Delete from FTS index
 	_, _ = db.DB.ExecContext(context.Background(),
 		`INSERT INTO blog_search(blog_search, rowid, title, body)
 		 VALUES('delete', ?, '', '');`, c.ID)
-
 	return nil
 }
 
-// Get single blog post by ID
+// ✅ Get single blog
 func GetById(id int64) (Content, error) {
 	query := `
 	SELECT id, language, type, image, title, body, meta_tag, created_at, featured
-	FROM blog_data
-	WHERE id = ?;
+	FROM blog_data WHERE id = ?;
 	`
 	row := db.DB.QueryRowContext(context.Background(), query, id)
 
 	var c Content
-	err := row.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title, &c.Body, &c.Tag, &c.CreatedAt, &c.Featured)
-	if err != nil {
+	if err := row.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title, &c.Body, &c.Tag, &c.CreatedAt, &c.Featured); err != nil {
 		if err == sql.ErrNoRows {
 			return Content{}, fmt.Errorf("blog not found")
 		}
 		return Content{}, fmt.Errorf("failed to get content: %w", err)
 	}
-
 	c.Image = utils.Url(c.Image)
 	return c, nil
 }
 
-// Get list of blogs (with optional search)
+// ✅ Get blogs (with or without search)
 func GetContents(title string, page int, language string, category string, featured string) ([]Content, error) {
 	const limit = 10
 	offset := (page - 1) * limit
@@ -159,35 +135,44 @@ func GetContents(title string, page int, language string, category string, featu
 		err  error
 	)
 
+	// 🔍 If search keyword is given
 	if title != "" {
-		// 🔍 Full-text search mode
+		match := fmt.Sprintf("%s*", title) // FTS5 wildcard
 		query := `
-			SELECT blog_data.id, blog_data.language, blog_data.type, blog_data.image, blog_data.title,
-				   blog_data.body, blog_data.created_at, blog_data.featured,
-				   bm25(blog_search) AS score
-			FROM blog_search
-			JOIN blog_data ON blog_data.id = blog_search.rowid
-			WHERE blog_search MATCH ?
-			  AND blog_data.language = ?
-			  AND blog_data.type = ?
-			  AND blog_data.featured = ?
+			SELECT d.id, d.language, d.type, d.image, d.title, d.body,
+				   d.created_at, d.featured, bm25(s) AS score
+			FROM blog_search s
+			JOIN blog_data d ON d.id = s.rowid
+			WHERE s MATCH ?
+			  AND (? = '' OR d.language = ?)
+			  AND (? = '' OR d.type = ?)
+			  AND (? = '' OR d.featured = ?)
 			ORDER BY score ASC
 			LIMIT ? OFFSET ?;
 		`
-		match := fmt.Sprintf("title:%s*", title)
-		rows, err = db.DB.QueryContext(context.Background(), query, match, language, category, featured, limit, offset)
+		rows, err = db.DB.QueryContext(context.Background(),
+			query, match,
+			language, language,
+			category, category,
+			featured, featured,
+			limit, offset)
 	} else {
-		// 🧾 Normal (non-search) mode
+		// 🧾 Normal list (no search)
 		query := `
 			SELECT id, language, type, image, title, body, created_at, featured
 			FROM blog_data
-			WHERE language = ?
-			  AND type = ?
-			  AND featured = ?
+			WHERE (? = '' OR language = ?)
+			  AND (? = '' OR type = ?)
+			  AND (? = '' OR featured = ?)
 			ORDER BY created_at DESC
 			LIMIT ? OFFSET ?;
 		`
-		rows, err = db.DB.QueryContext(context.Background(), query, language, category, featured, limit, offset)
+		rows, err = db.DB.QueryContext(context.Background(),
+			query,
+			language, language,
+			category, category,
+			featured, featured,
+			limit, offset)
 	}
 
 	if err != nil {
@@ -199,13 +184,15 @@ func GetContents(title string, page int, language string, category string, featu
 	for rows.Next() {
 		var c Content
 		if title != "" {
-			if err := rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title, &c.Body, &c.CreatedAt, &c.Featured, &c.Score); err != nil {
-				return nil, err
-			}
+			err = rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title,
+				&c.Body, &c.CreatedAt, &c.Featured, &c.Score)
 		} else {
-			if err := rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title, &c.Body, &c.CreatedAt, &c.Featured); err != nil {
-				return nil, err
-			}
+			err = rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title,
+				&c.Body, &c.CreatedAt, &c.Featured)
+			c.Score = nil
+		}
+		if err != nil {
+			return nil, err
 		}
 		c.Image = utils.Url(c.Image)
 		contents = append(contents, c)
