@@ -13,10 +13,12 @@ func Authenticate(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "You did not input the token"})
 		return
 	}
+
 	err := utils.Check(token)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid token"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
 	}
-	c.Next()
 
+	c.Next()
 }
