@@ -23,10 +23,16 @@ type Content struct {
 	Score     *float64 `json:"score,omitempty"`
 }
 
-// ✅ Add new content and sync with FTS
+// ✅ Add new blog content
 func (c *Content) Add() error {
 	if c.Featured == "" {
 		c.Featured = "false"
+	}
+
+	// Upload image to Cloudinary
+	imageURL, err := utils.UploadImage(c.Image)
+	if err != nil {
+		return fmt.Errorf("failed to upload image: %w", err)
 	}
 
 	query := `
@@ -37,7 +43,7 @@ func (c *Content) Add() error {
 	res, err := db.DB.ExecContext(context.Background(), query,
 		c.Language,
 		c.Type,
-		utils.ImageUploadPath(c.Image),
+		imageURL, // Save full Cloudinary URL
 		c.Title,
 		c.Body,
 		c.Tag,
@@ -55,20 +61,18 @@ func (c *Content) Add() error {
 		return fmt.Errorf("could not get created_at: %w", err)
 	}
 
-	// FTS is auto-synced by triggers, but just in case:
-	_, _ = db.DB.ExecContext(context.Background(),
-		`INSERT INTO blog_search(rowid, title, body)
-		 SELECT id, title, body FROM blog_data
-		 WHERE id NOT IN (SELECT rowid FROM blog_search);`)
-
 	return nil
 }
 
-// ✅ Update existing content and FTS
+// ✅ Update blog content
 func (c *Content) Update() error {
 	imagePath := c.Image
 	if !strings.HasPrefix(imagePath, "http") {
-		imagePath = utils.ImageUploadPath(imagePath)
+		var err error
+		imagePath, err = utils.UploadImage(imagePath)
+		if err != nil {
+			return fmt.Errorf("failed to upload image: %w", err)
+		}
 	}
 
 	query := `
@@ -88,6 +92,7 @@ func (c *Content) Update() error {
 		 VALUES('delete', ?, '', '');`, c.ID)
 	_, _ = db.DB.ExecContext(context.Background(),
 		`INSERT INTO blog_search(rowid, title, body) VALUES (?, ?, ?)`,
+
 		c.ID, c.Title, c.Body)
 
 	return nil
@@ -121,10 +126,12 @@ func GetById(id int64) (Content, error) {
 		}
 		return Content{}, fmt.Errorf("failed to get content: %w", err)
 	}
-	c.Image = utils.Url(c.Image)
+
+	// ⚠️ No need to rebuild Cloudinary URL — it's already a full URL
 	return c, nil
 }
 
+// ✅ Get all contents (with optional filters & search)
 func GetContents(title string, page int, language string, category string, featured string) ([]Content, error) {
 	const limit = 10
 	offset := (page - 1) * limit
@@ -136,7 +143,6 @@ func GetContents(title string, page int, language string, category string, featu
 
 	// 🔍 If search keyword is given
 	if title != "" {
-		// FTS5 wildcard
 		match := title + "*"
 
 		query := `
@@ -188,11 +194,9 @@ func GetContents(title string, page int, language string, category string, featu
 	for rows.Next() {
 		var c Content
 		if title != "" {
-			// search mode includes score
 			err = rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title,
 				&c.Body, &c.CreatedAt, &c.Featured, &c.Score)
 		} else {
-			// normal mode
 			err = rows.Scan(&c.ID, &c.Language, &c.Type, &c.Image, &c.Title,
 				&c.Body, &c.CreatedAt, &c.Featured)
 			c.Score = nil
@@ -200,7 +204,8 @@ func GetContents(title string, page int, language string, category string, featu
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
-		c.Image = utils.Url(c.Image)
+
+		// ⚠️ No BuildURL needed — use stored full Cloudinary link
 		contents = append(contents, c)
 	}
 

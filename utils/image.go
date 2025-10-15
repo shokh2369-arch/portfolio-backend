@@ -7,49 +7,49 @@ import (
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
-	"github.com/joho/godotenv"
 )
 
-func ImageUploadPath(photo string) string {
-	_ = godotenv.Load() // loads .env if exists
+// Hardcoded Cloudinary URL
+const cloudinaryURL = "cloudinary://129343476295679:4Qf5grKG_o2uY26vhT03KTwlHCc@diitl5gey"
 
-	cld, err := cloudinary.NewFromURL(os.Getenv("CLOUDINARY_URL"))
-	ctx := context.Background()
+// Global Cloudinary instance
+var cld *cloudinary.Cloudinary
+
+func init() {
+	var err error
+	cld, err = cloudinary.NewFromURL(cloudinaryURL)
 	if err != nil {
 		log.Fatalf("Failed to initialize Cloudinary: %v", err)
 	}
+}
 
-	file, err := os.Open(photo)
+// UploadImage uploads a local file to Cloudinary and returns the secure URL
+func UploadImage(localPath string) (string, error) {
+	ctx := context.Background()
+	file, err := os.Open(localPath)
 	if err != nil {
-		log.Fatalf("Failed to open file: %v", err)
+		return "", err
 	}
 	defer file.Close()
 
-	uploadResult, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
-		Folder:       "golang_uploads",
-		ResourceType: "image",
+	res, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
+		Folder: "golang_portfolio",
 	})
 	if err != nil {
-		log.Fatalf("Failed to upload image: %v", err)
+		return "", err
 	}
-
-	return uploadResult.SecureURL
+	return res.SecureURL, nil
 }
 
-func Url(photo string) string {
-	_ = godotenv.Load() // loads .env if exists
-
-	cld, err := cloudinary.NewFromURL(os.Getenv("CLOUDINARY_URL"))
+// BuildURL returns the Cloudinary URL for a given public ID
+func BuildURL(publicID string) (string, error) {
+	image, err := cld.Image(publicID)
 	if err != nil {
-		log.Fatalf("Failed to initialize Cloudinary: %v", err)
+		return "", err
 	}
-	image, err := cld.Image(photo)
+	url, err := image.String()
 	if err != nil {
-		log.Fatalf("Failed to get image: %v", err)
+		return "", err
 	}
-	imageUrl, err := image.String()
-	if err != nil {
-		log.Fatalf("Failed to get image URL: %v", err)
-	}
-	return imageUrl
+	return url, nil
 }
