@@ -9,30 +9,29 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
-// Hardcoded Cloudinary URL
-const cloudinaryURL = "cloudinary://721944613822773:ywzK-Mn7e7u8BF7tA2Mb0He_LQU@dqmhxpykv"
-
-// Global Cloudinary instance
 var cld *cloudinary.Cloudinary
 
-func init() {
+func InitCloudinary() {
+	cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+	if cloudinaryURL == "" {
+		log.Fatal("❌ CLOUDINARY_URL environment variable is not set")
+	}
+
 	var err error
 	cld, err = cloudinary.NewFromURL(cloudinaryURL)
 	if err != nil {
-		log.Fatalf("Failed to initialize Cloudinary: %v", err)
+		log.Fatalf("❌ Failed to initialize Cloudinary: %v", err)
 	}
+	log.Println("✅ Cloudinary initialized successfully")
 }
 
-// UploadImage uploads a local file to Cloudinary and returns the secure URL
 func UploadImage(localPath string) (string, error) {
-	ctx := context.Background()
-	file, err := os.Open(localPath)
-	if err != nil {
-		return "", err
+	if cld == nil {
+		InitCloudinary()
 	}
-	defer file.Close()
 
-	res, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
+	ctx := context.Background()
+	res, err := cld.Upload.Upload(ctx, localPath, uploader.UploadParams{
 		Folder: "golang_portfolio",
 	})
 	if err != nil {
@@ -41,15 +40,14 @@ func UploadImage(localPath string) (string, error) {
 	return res.SecureURL, nil
 }
 
-// BuildURL returns the Cloudinary URL for a given public ID
 func BuildURL(publicID string) (string, error) {
+	if cld == nil {
+		InitCloudinary()
+	}
+
 	image, err := cld.Image(publicID)
 	if err != nil {
 		return "", err
 	}
-	url, err := image.String()
-	if err != nil {
-		return "", err
-	}
-	return url, nil
+	return image.String()
 }

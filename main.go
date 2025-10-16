@@ -39,6 +39,8 @@ func init() {
 	if botToken == "" || adminID == "" {
 		log.Fatal("botToken or adminID not set in environment")
 	}
+	utils.InitCloudinary()
+
 }
 
 // @title Portfolio API
@@ -56,6 +58,11 @@ func init() {
 // @host portfolioshokh.onrender.com
 // @BasePath /
 // @schemes https
+
+// @securityDefinitions.apikey TokenAuth
+// @in header
+// @name Authorization
+// @description Paste your login token directly (no "Bearer" needed).
 
 func main() {
 	db.Initdb()

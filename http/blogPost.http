@@ -1,6 +1,10 @@
 POST http://localhost:8080/post
 Content-Type: application/json
+<<<<<<< HEAD
 Authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNob2toMUBleGFtcGxlLmNvbSIsImV4cCI6MTc2MDUxNzIyMSwidXNlcm5hbWUiOiJzaG9raDEifQ.ovLzIu88hoZPnWUrdvpIoPTNVkONSmaWOwmsDagJu6o
+=======
+Authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNob2toMUBleGFtcGxlLmNvbSIsImV4cCI6MTc2MDQ1MTI3NiwidXNlcm5hbWUiOiJzaG9raDEifQ.ijTgTmoR5qgq56rbACQcxHBJPilxXUhb899YcVysg90
+>>>>>>> 2569d0b (Save local changes before pulling)
 
 {
        "language": "uz",
