@@ -59,10 +59,12 @@ func init() {
 // @BasePath /
 // @schemes https
 
-// @securityDefinitions.apikey TokenAuth
+// @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
-// @description Paste your login token directly (no "Bearer" needed).
+// @description Enter your JWT token. Example: "Bearer <your_token>"
+
+// @security BearerAuth
 
 func main() {
 	db.Initdb()

@@ -18,7 +18,7 @@
         },
         "version": "1.0"
     },
-    "host": "portfolio-backend-3o6v.onrender.com",
+    "host": "portfolioshokh.onrender.com",
     "basePath": "/",
     "paths": {
         "/blog/{id}": {
@@ -635,5 +635,18 @@
                 }
             }
         }
-    }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Enter your JWT token. Example: \"Bearer \u003cyour_token\u003e\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "BearerAuth": []
+        }
+    ]
 }

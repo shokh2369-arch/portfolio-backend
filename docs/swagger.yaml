@@ -70,7 +70,7 @@ definitions:
     - phone
     - telegram
     type: object
-host: portfolio-backend-3o6v.onrender.com
+host: portfolioshokh.onrender.com
 info:
   contact:
     email: support@swagger.io
@@ -420,4 +420,12 @@ paths:
       - content
 schemes:
 - https
+security:
+- BearerAuth: []
+securityDefinitions:
+  BearerAuth:
+    description: 'Enter your JWT token. Example: "Bearer <your_token>"'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
