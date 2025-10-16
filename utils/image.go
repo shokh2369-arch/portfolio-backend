@@ -10,7 +10,7 @@ import (
 )
 
 // Hardcoded Cloudinary URL
-const cloudinaryURL = "loudinary://721944613822773:ywzK-Mn7e7u8BF7tA2Mb0He_LQU@dqmhxpykv"
+const cloudinaryURL = "cloudinary://721944613822773:ywzK-Mn7e7u8BF7tA2Mb0He_LQU@dqmhxpykv"
 
 // Global Cloudinary instance
 var cld *cloudinary.Cloudinary
