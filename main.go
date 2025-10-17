@@ -185,26 +185,6 @@ func sendTelegramMessage(token, chatID, message string) error {
 	return nil
 }
 
-<<<<<<< HEAD
-// @Summary      Publish new blog
-// @Description  Creates a new content entry (blog or project) in the database
-// @Security     TokenAuth
-// @Tags         content
-// @Accept       json
-// @Produce      json
-// @Param        content  body      content.Content  true  "Blog data"
-// @Success      201      {object}  content.Content  "Blog created successfully"
-// @Failure      400      {object}  map[string]string  "Invalid request"
-// @Failure      500      {object}  map[string]string  "Database or server error"
-// @Router       /post [post]
-func publishBlog(c *gin.Context) {
-	var k content.Content
-	if err := c.ShouldBindJSON(&k); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-
-=======
 // @Summary      Publish new blog or project
 // @Description  Upload image and publish content
 // @Security     TokenAuth
@@ -254,7 +234,6 @@ func publishBlog(c *gin.Context) {
 		Tag:      metaTag,
 	}
 
->>>>>>> b0a1b44 (Add new API endpoint for blog upload)
 	if err := k.Add(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not publish the blog", "details": err.Error()})
 		return
