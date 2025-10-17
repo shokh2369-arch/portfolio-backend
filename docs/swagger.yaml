@@ -261,6 +261,65 @@ paths:
       summary: Hello endpoint
       tags:
       - general
+  /post:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image and publish content
+      parameters:
+      - description: Language (e.g., uz)
+        in: formData
+        name: language
+        required: true
+        type: string
+      - description: Type (blog/project)
+        in: formData
+        name: type
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Body
+        in: formData
+        name: body
+        required: true
+        type: string
+      - description: Meta tags
+        in: formData
+        name: meta_tag
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/content.Content'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - TokenAuth: []
+      summary: Publish new blog or project
+      tags:
+      - content
   /request:
     post:
       consumes:

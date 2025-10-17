@@ -69,7 +69,16 @@ func init() {
 func main() {
 	db.Initdb()
 	r := gin.Default()
-
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	})
 	auth := r.Group("/")
 	auth.Use(middlewares.Authenticate)
 	{
@@ -201,7 +210,6 @@ func sendTelegramMessage(token, chatID, message string) error {
 // @Failure      400  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
 // @Router       /post [post]
-
 func publishBlog(c *gin.Context) {
 	// Get form fields
 	language := c.PostForm("language")
