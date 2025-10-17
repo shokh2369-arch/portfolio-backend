@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 POST http://localhost:8080/post
 Content-Type: application/json
 <<<<<<< HEAD
@@ -14,3 +15,17 @@ Authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNob2toMUBleGFtc
        "body": "Golang is a statically typed programming language developed by Google...",
        "meta_tag": "golang,programming,backend"
 }
+=======
+POST https://portfolio-backend-3o6v.onrender.com/post
+Content-Type: application/json
+Accept: application/json
+
+{
+  "language": "uz",
+  "type": "project",
+  "image": "images.webp",
+  "title": "Learning Golang",
+  "body": "Golang is a statically typed programming language developed by Google...",
+  "meta_tag": "golang,programming,backend"
+}
+>>>>>>> b0a1b44 (Add new API endpoint for blog upload)

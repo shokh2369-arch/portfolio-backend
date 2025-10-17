@@ -185,6 +185,7 @@ func sendTelegramMessage(token, chatID, message string) error {
 	return nil
 }
 
+<<<<<<< HEAD
 // @Summary      Publish new blog
 // @Description  Creates a new content entry (blog or project) in the database
 // @Security     TokenAuth
@@ -203,6 +204,57 @@ func publishBlog(c *gin.Context) {
 		return
 	}
 
+=======
+// @Summary      Publish new blog or project
+// @Description  Upload image and publish content
+// @Security     TokenAuth
+// @Tags         content
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        language  formData  string  true  "Language (e.g., uz)"
+// @Param        type      formData  string  true  "Type (blog/project)"
+// @Param        image     formData  file    true  "Image file"
+// @Param        title     formData  string  true  "Title"
+// @Param        body      formData  string  true  "Body"
+// @Param        meta_tag  formData  string  false "Meta tags"
+// @Success      201  {object}  content.Content
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /post [post]
+
+func publishBlog(c *gin.Context) {
+	// Get form fields
+	language := c.PostForm("language")
+	typ := c.PostForm("type")
+	title := c.PostForm("title")
+	body := c.PostForm("body")
+	metaTag := c.PostForm("meta_tag")
+
+	// Get uploaded file
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Image file is required"})
+		return
+	}
+
+	// Upload image (for example, to Cloudinary or local)
+	filename := fmt.Sprintf("uploads/%s", file.Filename)
+	if err := c.SaveUploadedFile(file, filename); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+		return
+	}
+
+	// Build content object
+	k := content.Content{
+		Language: language,
+		Type:     typ,
+		Title:    title,
+		Body:     body,
+		Image:    filename, // store the path or Cloudinary URL
+		Tag:      metaTag,
+	}
+
+>>>>>>> b0a1b44 (Add new API endpoint for blog upload)
 	if err := k.Add(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not publish the blog", "details": err.Error()})
 		return

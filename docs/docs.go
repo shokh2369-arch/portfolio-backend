@@ -291,6 +291,7 @@ const docTemplate = `{
                 }
             }
         },
+<<<<<<< HEAD
         "/post": {
             "post": {
                 "security": [
@@ -348,6 +349,8 @@ const docTemplate = `{
                 }
             }
         },
+=======
+>>>>>>> b0a1b44 (Add new API endpoint for blog upload)
         "/request": {
             "post": {
                 "description": "Accepts user portfolio request data, saves it, and notifies admin via Telegram",

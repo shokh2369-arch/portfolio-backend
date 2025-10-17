@@ -261,6 +261,7 @@ paths:
       summary: Hello endpoint
       tags:
       - general
+<<<<<<< HEAD
   /post:
     post:
       consumes:
@@ -297,6 +298,8 @@ paths:
       summary: Publish new blog
       tags:
       - content
+=======
+>>>>>>> b0a1b44 (Add new API endpoint for blog upload)
   /request:
     post:
       consumes:
