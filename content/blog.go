@@ -23,7 +23,6 @@ type Content struct {
 	Score     *float64 `json:"score,omitempty"`
 }
 
-// ✅ Add new blog content
 func (c *Content) Add() error {
 	if c.Featured == "" {
 		c.Featured = "false"
@@ -64,7 +63,6 @@ func (c *Content) Add() error {
 	return nil
 }
 
-// ✅ Update blog content
 func (c *Content) Update() error {
 	imagePath := c.Image
 	if !strings.HasPrefix(imagePath, "http") {
@@ -98,7 +96,6 @@ func (c *Content) Update() error {
 	return nil
 }
 
-// ✅ Delete from both tables
 func (c *Content) Delete() error {
 	_, err := db.DB.ExecContext(context.Background(),
 		"DELETE FROM blog_data WHERE id = ?", c.ID)
@@ -111,7 +108,6 @@ func (c *Content) Delete() error {
 	return nil
 }
 
-// ✅ Get single blog
 func GetById(id int64) (Content, error) {
 	query := `
 	SELECT id, language, type, image, title, body, meta_tag, created_at, featured
@@ -127,11 +123,9 @@ func GetById(id int64) (Content, error) {
 		return Content{}, fmt.Errorf("failed to get content: %w", err)
 	}
 
-	// ⚠️ No need to rebuild Cloudinary URL — it's already a full URL
 	return c, nil
 }
 
-// ✅ Get all contents (with optional filters & search)
 func GetContents(title string, page int, language string, category string, featured string) ([]Content, error) {
 	const limit = 10
 	offset := (page - 1) * limit
@@ -141,7 +135,6 @@ func GetContents(title string, page int, language string, category string, featu
 		err  error
 	)
 
-	// 🔍 If search keyword is given
 	if title != "" {
 		match := title + "*"
 
@@ -166,7 +159,6 @@ func GetContents(title string, page int, language string, category string, featu
 			featured, featured,
 			limit, offset)
 	} else {
-		// 🧾 Normal list (no search)
 		query := `
 			SELECT id, language, type, image, title, body, created_at, featured
 			FROM blog_data
@@ -205,7 +197,6 @@ func GetContents(title string, page int, language string, category string, featu
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
-		// ⚠️ No BuildURL needed — use stored full Cloudinary link
 		contents = append(contents, c)
 	}
 
