@@ -69,6 +69,7 @@ func init() {
 func main() {
 	db.Initdb()
 	r := gin.Default()
+
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -89,7 +90,6 @@ func main() {
 	fmt.Println("SHOW_SIGNUP =", os.Getenv("SHOW_SIGNUP"))
 	r.GET("/blog/:id", getSingle)
 	r.GET("/portfolio", hello)
-	r.GET("/health", health)
 	r.GET("/blogs/:page", blogs)
 	r.POST("/request", request)
 	showSignup := os.Getenv("SHOW_SIGNUP")
@@ -108,6 +108,13 @@ func main() {
 		port = "8080"
 	}
 	r.Run("0.0.0.0:" + port)
+	go func() {
+		http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("OK"))
+		})
+		log.Fatal(http.ListenAndServe(":"+port, nil))
+	}()
 }
 
 // hello godoc
@@ -119,17 +126,6 @@ func main() {
 // @Router       /portfolio [get]
 func hello(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Hello world"})
-}
-
-// health checker
-// @Summary health endpoint
-// Description Used to ping the site
-// @Tags general
-// @produce json
-// @Success 200 {object}  map[string]string
-// @Router /health [get]
-func health(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Site is up!!"})
 }
 
 // request handles portfolio requests and sends a Telegram notification.
