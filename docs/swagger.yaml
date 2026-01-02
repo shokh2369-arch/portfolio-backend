@@ -210,6 +210,20 @@ paths:
       summary: for deleting the blog
       tags:
       - content
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: health endpoint
+      tags:
+      - general
   /login:
     post:
       consumes:

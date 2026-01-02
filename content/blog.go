@@ -28,10 +28,6 @@ func (c *Content) Add() error {
 		c.Featured = "false"
 	}
 
-<<<<<<< HEAD
-	
-=======
->>>>>>> 5f7c2c9626c3d7495004f678354da0bbf3c9f338
 	imageURL, err := utils.UploadImage(c.Image)
 	if err != nil {
 		return fmt.Errorf("failed to upload image: %w", err)
