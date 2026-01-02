@@ -89,14 +89,15 @@ func main() {
 	fmt.Println("SHOW_SIGNUP =", os.Getenv("SHOW_SIGNUP"))
 	r.GET("/blog/:id", getSingle)
 	r.GET("/portfolio", hello)
+	r.GET("/health", health)
 	r.GET("/blogs/:page", blogs)
 	r.POST("/request", request)
 	showSignup := os.Getenv("SHOW_SIGNUP")
 	if showSignup == "true" {
 		r.POST("/signup", register)
-		log.Println("Signup route enabled ✅")
+		log.Println("Signup route enabled ")
 	} else {
-		log.Println("Signup route hidden 🚫")
+		log.Println("Signup route hidden ")
 	}
 	r.POST("/login", login)
 
@@ -119,6 +120,17 @@ func main() {
 // @Router       /portfolio [get]
 func hello(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Hello world"})
+}
+
+// health checker
+// @Summary health endpoint
+// Description Used to ping the site
+// @Tags general
+// @produce json
+// @Success 200 {object}  map[string]string
+// @Router /health [get]
+func health(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "Site is up!!"})
 }
 
 // request handles portfolio requests and sends a Telegram notification.

@@ -28,7 +28,7 @@ func (c *Content) Add() error {
 		c.Featured = "false"
 	}
 
-	// Upload image to Cloudinary
+	
 	imageURL, err := utils.UploadImage(c.Image)
 	if err != nil {
 		return fmt.Errorf("failed to upload image: %w", err)
