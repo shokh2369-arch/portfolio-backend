@@ -55,7 +55,7 @@ func init() {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host portfolioshokh.onrender.com
+// @host portfolio-backend-3o6v.onrender.com
 // @BasePath /
 // @schemes https
 
@@ -499,4 +499,5 @@ func getSingle(c *gin.Context) {
 
 	c.JSON(http.StatusOK, content)
 }
+
 //done
