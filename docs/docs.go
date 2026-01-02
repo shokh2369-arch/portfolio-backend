@@ -213,28 +213,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/health": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "general"
-                ],
-                "summary": "health endpoint",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/login": {
             "post": {
                 "description": "Admin's login page",
@@ -711,7 +689,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "portfolioshokh.onrender.com",
+	Host:             "portfolio-backend-3o6v.onrender.com",
 	BasePath:         "/",
 	Schemes:          []string{"https"},
 	Title:            "Portfolio API",

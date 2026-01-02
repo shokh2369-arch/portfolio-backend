@@ -70,7 +70,7 @@ definitions:
     - phone
     - telegram
     type: object
-host: portfolioshokh.onrender.com
+host: portfolio-backend-3o6v.onrender.com
 info:
   contact:
     email: support@swagger.io
@@ -210,20 +210,6 @@ paths:
       summary: for deleting the blog
       tags:
       - content
-  /health:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: health endpoint
-      tags:
-      - general
   /login:
     post:
       consumes:

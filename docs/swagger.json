@@ -18,7 +18,7 @@
         },
         "version": "1.0"
     },
-    "host": "portfolioshokh.onrender.com",
+    "host": "portfolio-backend-3o6v.onrender.com",
     "basePath": "/",
     "paths": {
         "/blog/{id}": {
@@ -200,28 +200,6 @@
                     },
                     "500": {
                         "description": "Failed to delete blog",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/health": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "general"
-                ],
-                "summary": "health endpoint",
-                "responses": {
-                    "200": {
-                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
