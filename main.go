@@ -89,7 +89,11 @@ func main() {
 	fmt.Println("SHOW_SIGNUP =", os.Getenv("SHOW_SIGNUP"))
 	r.GET("/blog/:id", getSingle)
 	r.GET("/portfolio", hello)
+<<<<<<< HEAD
 	r.GET("/health", health)
+=======
+
+>>>>>>> 5f7c2c9626c3d7495004f678354da0bbf3c9f338
 	r.GET("/blogs/:page", blogs)
 	r.POST("/request", request)
 	showSignup := os.Getenv("SHOW_SIGNUP")
@@ -101,12 +105,12 @@ func main() {
 	}
 	r.POST("/login", login)
 
-	// ✅ Swagger route must be BEFORE Run
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // fallback for local testing
+		port = "8080" 
 	}
 	r.Run("0.0.0.0:" + port)
 }
@@ -122,6 +126,7 @@ func hello(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Hello world"})
 }
 
+<<<<<<< HEAD
 // health checker
 // @Summary health endpoint
 // Description Used to ping the site
@@ -132,6 +137,9 @@ func hello(c *gin.Context) {
 func health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Site is up!!"})
 }
+=======
+
+>>>>>>> 5f7c2c9626c3d7495004f678354da0bbf3c9f338
 
 // request handles portfolio requests and sends a Telegram notification.
 //

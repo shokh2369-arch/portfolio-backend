@@ -28,7 +28,10 @@ func (c *Content) Add() error {
 		c.Featured = "false"
 	}
 
+<<<<<<< HEAD
 	
+=======
+>>>>>>> 5f7c2c9626c3d7495004f678354da0bbf3c9f338
 	imageURL, err := utils.UploadImage(c.Image)
 	if err != nil {
 		return fmt.Errorf("failed to upload image: %w", err)
@@ -42,7 +45,7 @@ func (c *Content) Add() error {
 	res, err := db.DB.ExecContext(context.Background(), query,
 		c.Language,
 		c.Type,
-		imageURL, // Save full Cloudinary URL
+		imageURL,
 		c.Title,
 		c.Body,
 		c.Tag,
@@ -84,7 +87,6 @@ func (c *Content) Update() error {
 		return fmt.Errorf("failed to update blog_data: %w", err)
 	}
 
-	// Refresh FTS manually (triggers usually handle this)
 	_, _ = db.DB.ExecContext(context.Background(),
 		`INSERT INTO blog_search(blog_search, rowid, title, body)
 		 VALUES('delete', ?, '', '');`, c.ID)
