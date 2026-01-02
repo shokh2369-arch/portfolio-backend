@@ -108,13 +108,10 @@ func main() {
 		port = "8080"
 	}
 	r.Run("0.0.0.0:" + port)
-	go func() {
-		http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("OK"))
-		})
-		log.Fatal(http.ListenAndServe(":"+port, nil))
-	}()
+	r.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
+
 }
 
 // hello godoc
