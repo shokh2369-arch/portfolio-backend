@@ -78,7 +78,7 @@ func content() {
 		tokenize='porter'
 	);
 
-	-- Trigger: when a blog is added, insert into blog_search
+
 	CREATE TRIGGER IF NOT EXISTS blog_data_ai AFTER INSERT ON blog_data BEGIN
 		INSERT INTO blog_search(rowid, title, body)
 		VALUES (new.id, new.title, new.body);
@@ -92,7 +92,7 @@ func content() {
 		WHERE rowid = new.id;
 	END;
 
-	-- Trigger: when a blog is deleted, remove it from FTS
+
 	CREATE TRIGGER IF NOT EXISTS blog_data_ad AFTER DELETE ON blog_data BEGIN
 		DELETE FROM blog_search WHERE rowid = old.id;
 	END;
