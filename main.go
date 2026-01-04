@@ -22,8 +22,6 @@ import (
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	// gin-swagger middleware
-	// swagger embed files
 	swaggerFiles "github.com/swaggo/files"
 )
 
