@@ -22,8 +22,6 @@ import (
 	"github.com/joho/godotenv"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	// gin-swagger middleware
-	// swagger embed files
 	swaggerFiles "github.com/swaggo/files"
 )
 
@@ -215,34 +213,31 @@ func sendTelegramMessage(token, chatID, message string) error {
 // @Failure      500  {object}  map[string]string
 // @Router       /post [post]
 func publishBlog(c *gin.Context) {
-	// Get form fields
+
 	language := c.PostForm("language")
 	typ := c.PostForm("type")
 	title := c.PostForm("title")
 	body := c.PostForm("body")
 	metaTag := c.PostForm("meta_tag")
 
-	// Get uploaded file
 	file, err := c.FormFile("image")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Image file is required"})
 		return
 	}
 
-	// Upload image (for example, to Cloudinary or local)
 	filename := fmt.Sprintf("uploads/%s", file.Filename)
 	if err := c.SaveUploadedFile(file, filename); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
 		return
 	}
 
-	// Build content object
 	k := content.Content{
 		Language: language,
 		Type:     typ,
 		Title:    title,
 		Body:     body,
-		Image:    filename, // store the path or Cloudinary URL
+		Image:    filename,
 		Tag:      metaTag,
 	}
 

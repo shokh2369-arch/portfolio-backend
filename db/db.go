@@ -22,18 +22,15 @@ func Initdb() {
 		log.Fatal("❌ authToken environment variable is not set")
 	}
 
-	// Create a connector using URL and auth token
 	connector, err := libsql.NewConnector(dbURL, libsql.WithAuthToken(authToken))
 	if err != nil {
 		log.Fatalf("❌ Could not create Turso connector: %v", err)
 	}
 
-	// Open a *sql.DB instance using the connector
 	DB = sql.OpenDB(connector)
 
 	log.Println("✅ Connected to Turso successfully!")
 
-	// Create tables
 	infotable()
 	content()
 	signUp()
@@ -107,7 +104,6 @@ func content() {
 		log.Fatalf("❌ Could not create blog tables: %v", err)
 	}
 
-	// 🧠 Ensure blog_search is synced with any existing data
 	_, err = DB.ExecContext(ctx, `
 	INSERT INTO blog_search(rowid, title, body)
 	SELECT id, title, body
